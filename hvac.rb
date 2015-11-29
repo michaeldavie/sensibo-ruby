@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'ap'
 require 'nest_thermostat'
-require './sensibo.rb'
+require 'sensibo'
 
 nest = NestThermostat::Nest.new(email: 'user@email.com', password: 'mypassword', temperature_scale: :celsius)
 sensibo = Sensibo::System.new('myapikey')
