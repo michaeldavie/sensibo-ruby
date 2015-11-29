@@ -1,7 +1,6 @@
 require 'open-uri'
 require 'json'
 require 'httparty'
-require 'ap'
 
 module Sensibo
   class System
