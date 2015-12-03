@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-# This script is designed to control both heating and cooling with a dual-fuel 
-# heating system (heat pump and boiler) and a heat punmp for cooling. The Nest 
-# controls the boiler directly, and the script passes commands for the heat 
+# This script is designed to control both heating and cooling with a dual-fuel
+# heating system (heat pump and boiler) and a heat punmp for cooling. The Nest
+# controls the boiler directly, and the script passes commands for the heat
 # pump from the Nest to the Sensibo
 
 require 'nest_thermostat'
@@ -37,18 +37,18 @@ def updateIfNeeded
       return 'swtich on'
     else return 'still off'
     end
-    
+
   when true
     if @boilerCall
       sensiboUpdate(false)
       return 'swtich off'
     end
-    
+
     if (@sensiboMode != @nestMode)
       sensiboUpdate(true)
       return 'mode change'
     end
-    
+
     if (@sensiboTemp != @nestTemp)
       sensiboUpdate(true)
       return 'temp change'
@@ -61,7 +61,7 @@ end
 
 def sensiboUpdate (podOn)
   sensiboFan = 'auto'
-     
+
   @pods.each do |pod|
     pod.setState(podOn, @nestMode, sensiboFan, @nestTemp)
   end
