@@ -3,13 +3,13 @@ require 'json'
 require 'httparty'
 
 module Sensibo
+  
   class System
 
     attr_reader :pods
 
-    def initialize(key)
-  
-      @apiKey = key
+    def initialize(apiKey:)
+      @apiKey = apiKey
       @urlBase = 'https://home.sensibo.com/api/v2/'
       @urlEnd = '?apiKey=' + @apiKey
     
@@ -21,12 +21,13 @@ module Sensibo
       podResults.each do |pod|
         pods.push(Pod.new(@apiKey, pod['id']))
       end      
-    end
+    end    
   end
 
   class Pod
   
-    attr_reader :id, :measurementAge, :measurementTime, :currentTemp, :currentHumidity, :on, :mode, :fanLevel, :targetTemp
+    attr_reader :id, :measurementAge, :measurementTime, :currentTemp, :currentHumidity
+    attr_accessor :on, :mode, :fan, :targetTemp
   
     def initialize(key, id)
       @apiKey = key
@@ -47,7 +48,7 @@ module Sensibo
       
       @on = stateData['on']
       @mode = stateData['mode']
-      @fanLevel = stateData['fanLevel']
+      @fan = stateData['fan']
       @targetTemp = stateData['targetTemperature']
     end
     
@@ -61,17 +62,23 @@ module Sensibo
       @currentHumidity = podData['humidity']    
     end
     
-    def setState(on, mode, fanLevel, targetTemp)
+    def update (on: @on, mode: @mode, fan: @fan, targetTemp: @targetTemp)
+      @on = on
+      @mode = mode
+      @fan = fan
+      @targetTemp = targetTemp
+    end
+    
+    def setState
       podUpdateURL = @urlBase + 'pods/' + @id + '/acStates' + @urlEnd
 
       response = HTTParty.post(
         podUpdateURL,
         { 
-          :body => { 'acState' => {"on" => on, "mode" => mode, "fanLevel" => fanLevel, "targetTemperature" => targetTemp } }.to_json,
+          :body => { 'acState' => {"on" => @on, "mode" => @mode, "fanLevel" => @fan, "targetTemperature" => @targetTemp } }.to_json,
           :headers => { 'Content-Type' => 'application/json', 'Accept' => 'application/json'}
         }
       )
-      getState
     end
   end
 end
