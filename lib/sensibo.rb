@@ -26,8 +26,8 @@ module Sensibo
 
   class Pod
   
-    attr_reader :id, :measurementAge, :measurementTime, :currentTemp, :currentHumidity
-    attr_accessor :on, :mode, :fan, :targetTemp
+    attr_reader :id, :measurementAge, :measurementTime, :currentTemp, :currentHumidity, :batteryVoltage
+    attr_accessor :on, :mode, :fan, :targetTemp, :swing
   
     def initialize(key, id)
       @apiKey = key
@@ -37,6 +37,7 @@ module Sensibo
       
       getState
       getMeasurements
+      getBattery
     end
   
     def getState
@@ -50,6 +51,7 @@ module Sensibo
       @mode = stateData['mode']
       @fan = stateData['fan']
       @targetTemp = stateData['targetTemperature']
+      @swing = stateData['swing']
     end
     
     def getMeasurements
@@ -62,11 +64,19 @@ module Sensibo
       @currentHumidity = podData['humidity']    
     end
     
-    def update (on: @on, mode: @mode, fan: @fan, targetTemp: @targetTemp)
+    def getBattery
+      podDataURL = @urlBase + 'pods/' + @id + '/measurements' + @urlEnd + '&fields=batteryVoltage'
+      podData = JSON.parse(open(podDataURL).string)['result'][0]
+      
+      @batteryVoltage = podData['batteryVoltage']
+    end
+    
+    def update (on: @on, mode: @mode, fan: @fan, targetTemp: @targetTemp, swing: @swing)
       @on = on
       @mode = mode
       @fan = fan
       @targetTemp = targetTemp
+      @swing = swing
     end
     
     def setState
@@ -75,7 +85,7 @@ module Sensibo
       response = HTTParty.post(
         podUpdateURL,
         { 
-          :body => { 'acState' => {"on" => @on, "mode" => @mode, "fanLevel" => @fan, "targetTemperature" => @targetTemp } }.to_json,
+          :body => { 'acState' => {"on" => @on, "mode" => @mode, "fanLevel" => @fan, "targetTemperature" => @targetTemp, "swing" => @swing } }.to_json,
           :headers => { 'Content-Type' => 'application/json', 'Accept' => 'application/json'}
         }
       )
